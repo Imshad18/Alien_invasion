@@ -1,48 +1,40 @@
 import sys
-
 import pygame
-
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
 
+
 class AlienInvasion:
-    """Main class to manage the game assets"""
+    """Main class to manage game assets and behavior."""
+
     def __init__(self):
-        """initialize the game and create the resources"""
+        """Initialize the game and create game resources."""
         pygame.init()
         self.clock = pygame.time.Clock()
         self.settings = Settings()
 
-        self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        # Set up the screen
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
-
         pygame.display.set_caption("Alien Invasion")
+
+        # Initialize game objects
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
 
-        #set background colour
-        #self.bg_colour = (0,200,200)   so left this accidently and not removing because we did this in settings module
-
     def run_game(self):
-        """start the main loop for the game"""
+        """Start the main loop for the game."""
         while True:
-            #watch the keyboard and mouse events
             self._check_events()
-
-            #redraw the screen with background colour
-            self.screen.fill(self.settings.bg_colour)
-
-            #Make the most recently drawn screen visible.
             self.ship.update()
             self.bullets.update()
             self._update_screen()
             self.clock.tick(60)
 
-
     def _check_events(self):
-        """respond to keyboard input and mouse events"""
+        """Respond to keyboard and mouse events."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -51,9 +43,8 @@ class AlienInvasion:
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
 
-
     def _check_keydown_events(self, event):
-        """respond to keypress"""
+        """Respond to keypresses."""
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = True
         elif event.key == pygame.K_LEFT:
@@ -63,30 +54,39 @@ class AlienInvasion:
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
 
-    def _check_keyup_events(self,event):
-        """respond to key releases"""
+    def _check_keyup_events(self, event):
+        """Respond to key releases."""
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
 
     def _fire_bullet(self):
-        """create a new bullet and it to bullets group"""
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
+        """Create a new bullet and add it to the bullets group."""
+        if len(self.bullets) < self.settings.bullet_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
 
+    def _update_bullets(self):
+        """update position of bullets and get rid of old bullets"""
+        #update bullet positions
+        self._update_bullets()
+
+        # Get rid of bullets that have dissappeared
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
 
     def _update_screen(self):
-        """updates images on the screen and flip to the new screen"""
+        """Update images on the screen and flip to the new screen."""
         self.screen.fill(self.settings.bg_colour)
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.ship.blitme()
-
         pygame.display.flip()
 
 
 if __name__ == '__main__':
-    #Make a game instance and run the game
+    # Make a game instance and run the game
     ai = AlienInvasion()
     ai.run_game()
