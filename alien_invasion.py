@@ -4,6 +4,8 @@ import pygame
 
 from settings import Settings
 from ship import Ship
+from bullet import Bullet
+
 class AlienInvasion:
     """Main class to manage the game assets"""
     def __init__(self):
@@ -18,6 +20,7 @@ class AlienInvasion:
 
         pygame.display.set_caption("Alien Invasion")
         self.ship = Ship(self)
+        self.bullets = pygame.sprite.Group()
 
         #set background colour
         #self.bg_colour = (0,200,200)   so left this accidently and not removing because we did this in settings module
@@ -33,8 +36,10 @@ class AlienInvasion:
 
             #Make the most recently drawn screen visible.
             self.ship.update()
+            self.bullets.update()
             self._update_screen()
             self.clock.tick(60)
+
 
     def _check_events(self):
         """respond to keyboard input and mouse events"""
@@ -55,6 +60,8 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_SPACE:
+            self._fire_bullet()
 
     def _check_keyup_events(self,event):
         """respond to key releases"""
@@ -63,14 +70,20 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
 
+    def _fire_bullet(self):
+        """create a new bullet and it to bullets group"""
+        new_bullet = Bullet(self)
+        self.bullets.add(new_bullet)
+
+
     def _update_screen(self):
         """updates images on the screen and flip to the new screen"""
         self.screen.fill(self.settings.bg_colour)
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
         self.ship.blitme()
 
         pygame.display.flip()
-
-
 
 
 if __name__ == '__main__':
